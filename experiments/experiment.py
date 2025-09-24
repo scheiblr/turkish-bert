@@ -10,7 +10,26 @@ from flair.embeddings import TransformerWordEmbeddings, TransformerDocumentEmbed
 from flair.models import SequenceTagger, TextClassifier
 from flair.trainers import ModelTrainer
 from flair.trainers.plugins.loggers.tensorboard import TensorboardLogger
-from flair.trainers.plugins import AnnealingPlugin
+
+from flair.trainers.plugins.base import TrainerPlugin, TrainingInterrupt
+
+class EarlyStopPlugin(TrainerPlugin):
+    def __init__(self, patience: int = 3):
+        super().__init__()
+        self.patience = patience
+        self.bad_epochs = 0
+        self.best_score = None
+
+    @TrainerPlugin.hook
+    def after_evaluation(self, current_model_is_best, validation_scores, **kw):
+        if current_model_is_best:
+            self.bad_epochs = 0
+        else:
+            self.bad_epochs += 1
+            if self.bad_epochs >= self.patience:
+                raise TrainingInterrupt(
+                    f"No improvement for {self.patience} evals – early stopping!"
+                )
 
 
 from pathlib import Path
@@ -81,13 +100,8 @@ def run_experiment_text_classification(experiment_configuration: ExperimentConfi
         plugins.append(TensorboardLogger(log_dir=str(tb_path), comment=output_path))
 
     # Define early stopping
-    early_stopper = AnnealingPlugin(
-        base_path=output_path,
-        min_learning_rate=1e-6,
-        anneal_factor=0.5,
+    early_stopper = EarlyStopPlugin(
         patience=experiment_configuration.patience,
-        initial_extra_patience=0,
-        anneal_with_restarts=False,
     )
 
     trainer.fine_tune(
@@ -182,13 +196,8 @@ def run_experiment_token_classification(experiment_configuration: ExperimentConf
         plugins.append(TensorboardLogger(log_dir=str(tb_path), comment=output_path))
 
     # Define early stopping
-    early_stopper = AnnealingPlugin(
-        base_path=output_path,
-        min_learning_rate=1e-6,
-        anneal_factor=0.5,
+    early_stopper = EarlyStopPlugin(
         patience=experiment_configuration.patience,
-        initial_extra_patience=0,
-        anneal_with_restarts=False,
     )
 
     plugins.append(early_stopper)
