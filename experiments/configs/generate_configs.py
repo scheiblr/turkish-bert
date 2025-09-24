@@ -1,3 +1,6 @@
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 from pathlib import Path
 
 from omegaconf import OmegaConf
@@ -96,6 +99,10 @@ model_mapping = {
     "electra_small_cased":       "dbmdz/electra-small-turkish-cased-discriminator",
     "sindbert_base":             "sindbert/sindbert_base",
     "sindbert_large":            "sindbert/sindbert_large",
+    "mmbert_small":              "jhu-clsp/mmBERT-small",
+    "mmbert_base":               "jhu-clsp/mmBERT-base",
+    "xlm_roberta_base":          "FacebookAI/xlm-roberta-base",
+    "xlm_roberta_large":         "FacebookAI/xlm-roberta-large",
 }
 
 pos_datasets = {
