@@ -7,20 +7,20 @@ pos_dataset_template = \
     """
 batch_sizes:
   - 16
-  - 8
+  - 32
 learning_rates:
-  - !!float 3e-5
+  - !!float 5e-6
+  - !!float 7e-6
+  - !!float 1e-5
+  - !!float 2e-5
   - !!float 5e-5
 epochs:
-  - 3
+  - 30
+patience: 3
 context_sizes:
   - 0
 seeds:
   - 1
-  - 2
-  - 3
-  - 4
-  - 5
 layers: "-1"
 subword_poolings:
   - "first"
@@ -33,20 +33,20 @@ ner_dataset_template = \
     """
 batch_sizes:
   - 16
-  - 8
+  - 32
 learning_rates:
-  - !!float 3e-5
+  - !!float 5e-6
+  - !!float 7e-6
+  - !!float 1e-5
+  - !!float 2e-5
   - !!float 5e-5
 epochs:
-  - 10
+  - 30
+patience: 3
 context_sizes:
   - 0
 seeds:
   - 1
-  - 2
-  - 3
-  - 4
-  - 5
 layers: "-1"
 subword_poolings:
   - "first"
@@ -59,26 +59,26 @@ sentiment_dataset_template = \
     """
 batch_sizes:
   - 16
-  - 8
+  - 32
 learning_rates:
-  - !!float 3e-5
+  - !!float 5e-6
+  - !!float 7e-6
+  - !!float 1e-5
+  - !!float 2e-5
   - !!float 5e-5
 epochs:
-  - 3
+  - 30
+patience: 3
 context_sizes:
   - 0
 seeds:
   - 1
-  - 2
-  - 3
-  - 4
-  - 5
 layers: "-1"
 subword_poolings:
   - "first"
 use_crf: !!bool false
 use_tensorboard: !!bool true
-cuda: "0"
+cuda: "1"
 """
 
 model_mapping = {
@@ -94,6 +94,8 @@ model_mapping = {
     "electra_base_mc4_cased":    "dbmdz/electra-base-turkish-mc4-cased-discriminator",
     "electra_base_mc4_uncased":  "dbmdz/electra-base-turkish-mc4-uncased-discriminator",
     "electra_small_cased":       "dbmdz/electra-small-turkish-cased-discriminator",
+    "sindbert_base":             "sindbert/sindbert_base",
+    "sindbert_large":            "sindbert/sindbert_large",
 }
 
 pos_datasets = {

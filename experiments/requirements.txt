@@ -1,1 +1,2 @@
 git+https://github.com/flairNLP/flair.git@7eb85330772a26a9fed8a04dd022b859f868b980
+omegaconf==2.3.0

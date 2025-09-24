@@ -19,9 +19,9 @@ subword_poolings:
 - first
 use_crf: false
 use_tensorboard: true
-cuda: '1'
-task: sentiment
+cuda: '0'
+task: ner
 datasets:
-- offenseval/tr_2020
-hf_model: dbmdz/electra-base-turkish-mc4-cased-discriminator
-model_short_name: electra_base_mc4_cased
+- xtreme/tr
+hf_model: sindbert/sindbert_base
+model_short_name: sindbert_base

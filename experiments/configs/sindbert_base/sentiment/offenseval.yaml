@@ -23,5 +23,5 @@ cuda: '1'
 task: sentiment
 datasets:
 - offenseval/tr_2020
-hf_model: dbmdz/electra-base-turkish-mc4-cased-discriminator
-model_short_name: electra_base_mc4_cased
+hf_model: sindbert/sindbert_base
+model_short_name: sindbert_base

@@ -10,6 +10,8 @@ from flair.embeddings import TransformerWordEmbeddings, TransformerDocumentEmbed
 from flair.models import SequenceTagger, TextClassifier
 from flair.trainers import ModelTrainer
 from flair.trainers.plugins.loggers.tensorboard import TensorboardLogger
+from flair.trainers.plugins import AnnealingPlugin
+
 
 from pathlib import Path
 
@@ -38,6 +40,7 @@ class ExperimentConfiguration:
     subtoken_pooling: str = "first"
     use_crf: bool = False
     use_tensorboard: bool = True
+    patience: int = 3
 
 
 def run_experiment_text_classification(experiment_configuration: ExperimentConfiguration) -> str:
@@ -77,6 +80,16 @@ def run_experiment_text_classification(experiment_configuration: ExperimentConfi
 
         plugins.append(TensorboardLogger(log_dir=str(tb_path), comment=output_path))
 
+    # Define early stopping
+    early_stopper = AnnealingPlugin(
+        base_path=output_path,
+        min_learning_rate=1e-6,
+        anneal_factor=0.5,
+        patience=experiment_configuration.patience,
+        initial_extra_patience=0,
+        anneal_with_restarts=False,
+    )
+
     trainer.fine_tune(
         output_path,
         reduce_transformer_vocab=False,  # set this to False for slow version
@@ -85,6 +98,7 @@ def run_experiment_text_classification(experiment_configuration: ExperimentConfi
         learning_rate=experiment_configuration.learning_rate,
         main_evaluation_metric=("macro avg", "f1-score"),
         use_final_model_for_eval=False,
+        plugins=[early_stopper],
     )
 
     # Finally, print model card for information
@@ -167,6 +181,18 @@ def run_experiment_token_classification(experiment_configuration: ExperimentConf
 
         plugins.append(TensorboardLogger(log_dir=str(tb_path), comment=output_path))
 
+    # Define early stopping
+    early_stopper = AnnealingPlugin(
+        base_path=output_path,
+        min_learning_rate=1e-6,
+        anneal_factor=0.5,
+        patience=experiment_configuration.patience,
+        initial_extra_patience=0,
+        anneal_with_restarts=False,
+    )
+
+    plugins.append(early_stopper)
+
     trainer.fine_tune(
         output_path,
         learning_rate=experiment_configuration.learning_rate,
@@ -177,6 +203,7 @@ def run_experiment_token_classification(experiment_configuration: ExperimentConf
         weight_decay=0.,
         use_final_model_for_eval=False,
         plugins=plugins,
+        main_evaluation_metric=("micro avg", "f1-score"),
     )
 
     # Finally, print model card for information

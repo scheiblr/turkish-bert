@@ -27,5 +27,5 @@ datasets:
 - UD_Turkish-FrameNet/tr_framenet@36a9b3f719cb26e0313f77238fc3e94128f57e3b
 - UD_Turkish-IMST/tr_imst@cc03792f9d725991deb95514d2309b7eb7b3945b
 - UD_Turkish-Tourism/tr_tourism@4f9b9898ee9d262920ff36535f1a8bf0ef60a7c0
-hf_model: dbmdz/bert-base-turkish-cased
-model_short_name: berturk_cased
+hf_model: sindbert/sindbert_base
+model_short_name: sindbert_base

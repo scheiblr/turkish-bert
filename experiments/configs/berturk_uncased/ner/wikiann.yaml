@@ -1,19 +1,19 @@
 batch_sizes:
 - 16
-- 8
+- 32
 learning_rates:
-- 3.0e-05
+- 5.0e-06
+- 7.0e-06
+- 1.0e-05
+- 2.0e-05
 - 5.0e-05
 epochs:
-- 10
+- 30
+patience: 3
 context_sizes:
 - 0
 seeds:
 - 1
-- 2
-- 3
-- 4
-- 5
 layers: '-1'
 subword_poolings:
 - first

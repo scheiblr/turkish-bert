@@ -37,6 +37,7 @@ model_short_name   = conf.model_short_name
 task               = conf.task
 datasets           = conf.datasets
 use_tensorboard    = conf.use_tensorboard
+patience           = conf.patience
 
 cuda = conf.cuda
 flair.device = f'cuda:{cuda}'
@@ -59,6 +60,7 @@ for seed in seeds:
                             task=task,
                             datasets=datasets,
                             use_tensorboard=use_tensorboard,
+                            patience=patience
                         )
                         output_path = run_experiment(experiment_configuration=experiment_configuration)
 
