@@ -21,7 +21,7 @@ set as environment variable, e.g. `export CONFIG=configs/distilberturk_cased/pos
 After the `CONFIG` variable is set, the fine-tuning can be started by running:
 
 ```bash
-$ python3 fine_tuner.py
+$ ./fine_tuner.py
 ```
 
 ## Results
@@ -29,5 +29,5 @@ $ python3 fine_tuner.py
 After fine-tuning, the benchmark results can be parsed with:
 
 ```bash
-$ python3 flair-log-parser.py "flair-pos-distilberturk_cased-bs*"
+$ ./flair-log-parser.py "flair-pos-distilberturk_cased-bs*"
 ```
