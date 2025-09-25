@@ -113,6 +113,7 @@ def run_experiment_text_classification(experiment_configuration: ExperimentConfi
         main_evaluation_metric=("macro avg", "f1-score"),
         use_final_model_for_eval=False,
         plugins=[early_stopper],
+        save_final_model=False
     )
 
     # Finally, print model card for information
@@ -213,6 +214,7 @@ def run_experiment_token_classification(experiment_configuration: ExperimentConf
         use_final_model_for_eval=False,
         plugins=plugins,
         main_evaluation_metric=("micro avg", "f1-score"),
+        save_final_model=False,
     )
 
     # Finally, print model card for information
