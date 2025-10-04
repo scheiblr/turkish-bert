@@ -36,6 +36,7 @@ from pathlib import Path
 
 from typing import List
 
+from milliyet_ner_dataset import MILLIYET_NER
 from offenseval2020_tr_dataset import OFFENSEVAL_TR_2020
 from ud_datasets import UD_GENERIC
 
@@ -71,7 +72,7 @@ def run_experiment_text_classification(experiment_configuration: ExperimentConfi
 
     label_dict = corpus.make_label_dictionary(label_type=label_type)
 
-    document_embeddings = TransformerDocumentEmbeddings(experiment_configuration.base_model, fine_tune=True)
+    document_embeddings = TransformerDocumentEmbeddings(experiment_configuration.base_model, fine_tune=True, trust_remote_code=True)
 
     classifier = TextClassifier(document_embeddings, label_dictionary=label_dict, label_type=label_type)
 
@@ -142,11 +143,17 @@ def run_experiment_token_classification(experiment_configuration: ExperimentConf
         label_type = "ner"
 
         for dataset in experiment_configuration.datasets:
-            # E.g. xtreme/tr
-            loader, language = dataset.split("/")
-            if loader == "xtreme":
+            # Supported datasets:
+            # - xtreme/*
+            # - milliyet
+            if dataset.startswith("xtreme"):
+                _, language = dataset.split("/")
                 corpora.append(
                     NER_MULTI_XTREME(languages=language)
+                )
+            elif dataset.startswith("milliyet"):
+                corpora.append(
+                    MILLIYET_NER()
                 )
 
     corpora: MultiCorpus = MultiCorpus(corpora=corpora, sample_missing_splits=False)
@@ -160,6 +167,7 @@ def run_experiment_token_classification(experiment_configuration: ExperimentConf
         subtoken_pooling=experiment_configuration.subtoken_pooling,
         fine_tune=True,
         use_context=experiment_configuration.context_size,
+        trust_remote_code=True
     )
 
     tagger = SequenceTagger(
@@ -223,7 +231,15 @@ def run_experiment_token_classification(experiment_configuration: ExperimentConf
     return output_path
 
 def run_experiment(experiment_configuration: ExperimentConfiguration) -> str:
+    if "eurobert" in experiment_configuration.base_model.lower():
+        logger.info("EuroBERT familiy detected!")
+
+        from transformers import AutoConfig, CONFIG_MAPPING
+        config = AutoConfig.from_pretrained(experiment_configuration.base_model, trust_remote_code=True)
+        CONFIG_MAPPING.register("eurobert", config)
+
     if experiment_configuration.task in ["pos", "ner"]:
         return run_experiment_token_classification(experiment_configuration)
     elif experiment_configuration.task in ["sentiment"]:
         return run_experiment_text_classification(experiment_configuration)
+

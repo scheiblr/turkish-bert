@@ -9,9 +9,21 @@ from collections import defaultdict
 from pathlib import Path
 from tabulate import tabulate
 
+
+def parse_config_string(config: str) -> str:
+    """
+    Parse strings like 'bs32-e30-lr5e-05' and return '32,5e-05'.
+    """
+    match = re.search(r'bs(\d+).*?lr([0-9.e-]+)', config)
+    if not match:
+        raise ValueError(f"Could not parse '{config}'")
+    batch_size = match.group(1)
+    learning_rate = match.group(2)
+    return f"{learning_rate},{batch_size}"
+
 # pattern = "bert-tiny-historic-multilingual-cased-*"  # sys.argv[1]
 pattern = sys.argv[1]
-
+total_training_time = 0.0
 log_dirs = Path("./").rglob(f"{pattern}")
 
 dev_results = defaultdict(list)
@@ -20,11 +32,14 @@ test_results_macro = defaultdict(list)
 
 log_dirs = [log_dir for log_dir in log_dirs if ".cache" not in str(log_dir)]
 
+epoch_last_iter_time = dict()
+
 for log_dir in log_dirs:
     training_log = log_dir / "training.log"
 
     if not training_log.exists():
         print(f"No training.log found in {log_dir}")
+        continue
 
     matches = re.match(r".*(bs.*?)-(e.*?)-(lr.*?)-(\d+)$", str(log_dir))
 
@@ -39,6 +54,19 @@ for log_dir in log_dirs:
         all_dev_results = []
         for line in f_p:
             line = line.rstrip()
+
+            # Extract time from last iter of each epoch
+            # Match lines like: epoch 13 - iter 690/699 - loss ... - time (sec): ...
+            iter_match = re.match(
+                r".*epoch (\d+) - iter (\d+)/(\d+) - loss .* - time \(sec\): ([\d.]+) .*", line
+            )
+
+            
+            if iter_match:
+                epoch = int(iter_match.group(1))
+                time = float(iter_match.group(4))
+                # Always overwrite: last iter line for each epoch will be the last one seen
+                epoch_last_iter_time[epoch] = time
 
             if "f1-score (micro avg)" in line or "f1-score (macro avg)" in line:
                 dev_result = line.split(" ")[-1]
@@ -55,6 +83,7 @@ for log_dir in log_dirs:
 
         best_dev_result = max([float(value) for value in all_dev_results])
         dev_results[result_identifier].append(best_dev_result)
+        total_training_time += sum(epoch_last_iter_time.values())
 
 mean_dev_results = {}
 
@@ -105,7 +134,7 @@ print("")
 
 print(f"Test Score (Micro F1) for best configuration ({best_dev_configuration}):\n")
 
-test_table_micro = [f"`{best_dev_configuration}`", *[round(res * 100, 2) for res in test_results_micro[best_dev_configuration]],
+test_table_micro = [f"{parse_config_string(best_dev_configuration)}", *[round(res * 100, 2) for res in test_results_micro[best_dev_configuration]],
                     f"{round(np.mean(test_results_micro[best_dev_configuration]) * 100, 2)} ± {round(np.std(test_results_micro[best_dev_configuration]) * 100, 2)}"]
 
 print(tabulate([test_table_micro], headers=header, tablefmt="github") + "\n")
@@ -114,7 +143,10 @@ print("")
 
 print(f"Test Score (Macro F1) for best configuration ({best_dev_configuration}):\n")
 
-test_table_macro = [f"`{best_dev_configuration}`", *[round(res * 100, 2) for res in test_results_macro[best_dev_configuration]],
+test_table_macro = [f"{parse_config_string(best_dev_configuration)}", *[round(res * 100, 2) for res in test_results_macro[best_dev_configuration]],
                     f"{round(np.mean(test_results_macro[best_dev_configuration]) * 100, 2)} ± {round(np.std(test_results_macro[best_dev_configuration]) * 100, 2)}"]
 
 print(tabulate([test_table_macro], headers=header, tablefmt="github") + "\n")
+
+
+print(f"\nTotal training time (sum of last logged iter times per epoch): {round(total_training_time, 2)} seconds\n")

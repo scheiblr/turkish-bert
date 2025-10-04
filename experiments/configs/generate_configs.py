@@ -103,6 +103,7 @@ model_mapping = {
     "mmbert_base":               "jhu-clsp/mmBERT-base",
     "xlm_roberta_base":          "FacebookAI/xlm-roberta-base",
     "xlm_roberta_large":         "FacebookAI/xlm-roberta-large",
+    "roberturk":                 "Nuri-Tas/roberturk-base",
 }
 
 pos_datasets = {
